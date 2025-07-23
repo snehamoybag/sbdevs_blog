@@ -5,7 +5,7 @@ interface FooterProps {}
 
 export default function Footer({}: Readonly<FooterProps>): ReactElement {
   return (
-    <footer>
+    <footer className="mt-4">
       <Paragraph400>Build by Snehamoy Bag</Paragraph400>
     </footer>
   );
