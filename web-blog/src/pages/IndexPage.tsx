@@ -3,6 +3,7 @@ import Main from "../components/Main";
 import BlogPost from "../components/BlogPost";
 import type { Blog } from "../types/Blog";
 import rawData from "../utils/data";
+import Pagination from "../components/Pagination";
 
 interface IndexPageProps {}
 
@@ -25,6 +26,7 @@ export default function IndexPage({}: Readonly<IndexPageProps>): ReactElement {
           userInteractions={item.userInteractions}
         />
       ))}
+      <Pagination />
     </Main>
   );
 }
