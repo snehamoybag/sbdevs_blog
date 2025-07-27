@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int    @id @default(autoincrement())
+  role         Role   @default(USER)
+  email        String @unique
+  passwordHash String
+
+  // although its set to optional, make sure to create a profile when creating a new user
+  profile Profile?
+
+  writtenBlogs Blog[] @relation("written")
+  likedBlogs   Blog[] @relation("likes")
+
+  writtenComments Comment[] @relation("written")
+  likedComments   Comment[] @relation("likes")
+
+  @@index(email)
+}
+
+// WARINING: make sure to create a profile and connect it to the user on new account creation
+model Profile {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(128)
+  bio       String?
+  avatarUrl String?  @unique
+  joinedAt  DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+}
+
+model Blog {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(128)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  status    Status   @default(DRAFT)
+
+  images BlogImage[]
+
+  category Category
+  tags     Tag[]
+
+  author   User @relation("written", fields: [authorId], references: [id])
+  authorId Int
+
+  likes    User[]    @relation("likes")
+  comments Comment[]
+}
+
+model BlogImage {
+  id  Int    @id @default(autoincrement())
+  url String @unique
+
+  blog   Blog @relation(fields: [blogId], references: [id])
+  blogId Int
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar(35)
+  blogs Blog[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  message   String   @db.VarChar(600)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  author   User @relation("written", fields: [authorId], references: [id])
+  authorId Int
+
+  blog   Blog @relation(fields: [blogId], references: [id])
+  blogId Int
+
+  likes User[] @relation("likes")
+
+  parentComment   Comment?  @relation("hierarchy", fields: [parentCommentId], references: [id])
+  parentCommentId Int?
+  replies         Comment[] @relation("hierarchy")
+}
+
+enum Role {
+  ADMIN
+  MODERATOR
+  USER
+}
+
+enum Category {
+  WEB_DEV
+  GAME_DEV
+  OFFTOPIC
+}
+
+// blog status
+enum Status {
+  PUBLISHED
+  DRAFT
+}
