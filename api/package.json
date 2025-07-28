@@ -1,5 +1,5 @@
 {
-  "name": "sbdevs_blog_api",
+  "name": "SBDEVS_Blog API",
   "version": "1.0.0",
   "description": "API for sbdevs_blog build on ExpressJS",
   "main": "dist/app.js",
@@ -23,6 +23,7 @@
   "devDependencies": {
     "@eslint/js": "^9.31.0",
     "@tsconfig/node22": "^22.0.2",
+    "@types/express": "^5.0.3",
     "@types/node": "^24.0.15",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.8",
