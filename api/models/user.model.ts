@@ -36,3 +36,38 @@ export const getIsPasswordMatching = async (
 
   return bcrypt.compare(password, user.passwordHash);
 };
+
+export const createOne = async (
+  email: string,
+  password: string,
+  name: string,
+  avatarUrl?: string,
+  bio?: string,
+): Promise<SafeUser> => {
+  const saltLength = 10;
+  const passwordHash = await bcrypt.hash(password, saltLength);
+
+  return prisma.user.create({
+    data: {
+      email,
+      passwordHash,
+      profile: {
+        create: {
+          name,
+          // include fields only if they exist
+          ...(bio ? { bio: bio.trim() } : {}),
+          ...(avatarUrl ? { avatarUrl } : {}),
+        },
+      },
+    },
+
+    omit: {
+      email: true,
+      passwordHash: true,
+    },
+
+    include: {
+      profile: true,
+    },
+  });
+};
