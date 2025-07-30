@@ -13,6 +13,7 @@ app.use(express.json());
 // ROUTES
 app.use("/", routes.index);
 app.use("/blogs", routes.blogs);
+app.use("/login", routes.login);
 
 // ERROR HANDLER
 app.use(handleRequestError);
