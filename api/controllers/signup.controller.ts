@@ -27,10 +27,9 @@ export const createUser: RequestHandler[] = [
       return;
     }
 
-    const { email, password, name, bio } = req.body;
-    const avatarUrl = ""; // TODO
+    const { email, password, name } = req.body;
 
-    const user = await createOneUser(email, password, name, avatarUrl, bio);
+    const user = await createOneUser(email, password, name);
 
     req.user = user;
 

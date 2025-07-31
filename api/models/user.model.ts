@@ -40,12 +40,11 @@ export const getIsPasswordMatching = async (
 export const createOne = async (
   email: string,
   password: string,
-  name: string,
-  avatarUrl?: string,
-  bio?: string,
+  name?: string,
 ): Promise<SafeUser> => {
   const saltLength = 10;
   const passwordHash = await bcrypt.hash(password, saltLength);
+  const defaultName = email.split("@")[0]; // get the name portion of email
 
   return prisma.user.create({
     data: {
@@ -53,10 +52,7 @@ export const createOne = async (
       passwordHash,
       profile: {
         create: {
-          name,
-          // include fields only if they exist
-          ...(bio ? { bio: bio.trim() } : {}),
-          ...(avatarUrl ? { avatarUrl } : {}),
+          name: name || defaultName,
         },
       },
     },
