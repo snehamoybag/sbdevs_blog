@@ -1,5 +1,6 @@
-import { RequestHandler, Request, Response, NextFunction } from "express";
+import { RequestHandler } from "express";
 import * as userValidation from "../validations/user.validations";
+import { name as validateProfileName } from "../validations/profile.validations";
 import { validationResult } from "express-validator";
 import FailureResponse from "../libs/http-response-shapes/failure.response-shape";
 import { createOne as createOneUser } from "../models/user.model";
@@ -9,8 +10,8 @@ import SuccessResponse from "../libs/http-response-shapes/success.response-shape
 export const createUser: RequestHandler[] = [
   userValidation.newEmail(),
   userValidation.password(),
-  userValidation.name(),
-  userValidation.bio(),
+  validateProfileName(),
+
   async (req, res, next) => {
     const validationErrors = validationResult(req);
 
