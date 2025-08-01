@@ -12,9 +12,10 @@ app.use(express.json());
 
 // ROUTES
 app.use("/", routes.index);
-app.use("/blogs", routes.blogs);
 app.use("/signup", routes.signup);
 app.use("/login", routes.login);
+app.use("/blogs", routes.blogs);
+app.use("/profile", routes.profile);
 
 // ERROR HANDLER
 app.use(handleRequestError);
