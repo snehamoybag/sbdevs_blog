@@ -20,7 +20,7 @@ const options: StrategyOptionsWithoutRequest = {
 const verifyCallback: VerifyCallback = async (payload, done) => {
   try {
     const userId = Number(payload.sub);
-    const user = getUserById(userId);
+    const user = await getUserById(userId);
 
     if (!user) {
       return done(null, false);
