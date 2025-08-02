@@ -5,6 +5,8 @@ import localUpload from "../configs/multer.config";
 import SuccessResponse from "../libs/http-response-shapes/success.response-shape";
 import uploadToCloud from "../libs/utils/upload-to-cloud";
 import deleteLocalFile from "../libs/utils/delete-local-file";
+import { validationResult } from "express-validator";
+import FailureResponse from "../libs/http-response-shapes/failure.response-shape";
 
 export const update: RequestHandler[] = [
   profileValidations.name(),
@@ -13,6 +15,21 @@ export const update: RequestHandler[] = [
   localUpload.single("avatar"),
 
   async (req, res) => {
+    const validationErrors = validationResult(req);
+
+    if (!validationErrors.isEmpty()) {
+      const statusCode = 400;
+
+      res
+        .status(statusCode)
+        .json(
+          new FailureResponse("Validations failed.", statusCode, {
+            errors: validationErrors.mapped(),
+          }),
+        );
+      return;
+    }
+
     const { name, bio } = req.body;
     let avatarUrl = "";
 
