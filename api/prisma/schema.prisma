@@ -65,8 +65,9 @@ model Blog {
 }
 
 model BlogImage {
-  id  Int    @id @default(autoincrement())
-  url String @unique
+  id       Int    @id @default(autoincrement())
+  publicId String @unique
+  url      String @unique
 
   blog   Blog @relation(fields: [blogId], references: [id])
   blogId Int

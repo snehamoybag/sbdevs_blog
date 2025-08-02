@@ -2,6 +2,12 @@ import { RequestHandler } from "express";
 import * as blogModel from "../models/blog.model";
 import SuccessResponse from "../libs/http-response-shapes/success.response-shape";
 import FailureResponse from "../libs/http-response-shapes/failure.response-shape";
+import * as blogValidations from "../validations/blog.validations";
+import localUpload from "../configs/multer.config";
+import assertUser from "../libs/asserts/assert-user";
+import { Multer } from "multer";
+import uploadToCloud from "../libs/utils/upload-to-cloud";
+import { validationResult } from "express-validator";
 
 export const getOne: RequestHandler = async (req, res) => {
   const blogId = Number(req.params.blogId);
@@ -32,3 +38,58 @@ export const getMany: RequestHandler = async (_req, res) => {
 
   res.json(new SuccessResponse(`List of ${limit} blogs.`, { blogs }));
 };
+
+export const createOne: RequestHandler[] = [
+  blogValidations.title(),
+  blogValidations.content(),
+  blogValidations.status(),
+  blogValidations.category(),
+  blogValidations.tags(),
+
+  localUpload.array("images"),
+
+  async (req, res) => {
+    const validationErrors = validationResult(req);
+
+    if (!validationErrors.isEmpty()) {
+      const statusCode = 400;
+
+      res.status(statusCode).json(
+        new FailureResponse("Validations failed.", statusCode, {
+          errors: validationErrors.mapped(),
+        }),
+      );
+
+      return;
+    }
+
+    const user = assertUser(req);
+    const imagesLocalData = req.files;
+    let images: { publicId: string; url: string }[] = [];
+
+    if (Array.isArray(imagesLocalData)) {
+      const uploadPromises = imagesLocalData.map((image) => {
+        return uploadToCloud(image.path);
+      });
+
+      const results = await Promise.all(uploadPromises);
+      images = results.map((image) => ({
+        publicId: image.public_id,
+        url: image.secure_url || image.url,
+      }));
+    }
+
+    const { title, content, status, category, tags } = req.body;
+    const blog = await blogModel.create(
+      user.id,
+      title,
+      content,
+      status,
+      category,
+      images,
+      tags,
+    );
+
+    res.json(new SuccessResponse("Blog created successfully.", { blog }));
+  },
+];
