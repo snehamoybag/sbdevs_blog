@@ -7,6 +7,7 @@ import localUpload from "../configs/multer.config";
 import assertUser from "../libs/asserts/assert-user";
 import uploadToCloud from "../libs/utils/upload-to-cloud";
 import { validationResult } from "express-validator";
+import deleteLocalFile from "../libs/utils/delete-local-file";
 
 export const getOne: RequestHandler = async (req, res) => {
   const blogId = Number(req.params.blogId);
@@ -45,8 +46,6 @@ export const createOne: RequestHandler[] = [
   blogValidations.category(),
   blogValidations.tags(),
 
-  localUpload.array("images"),
-
   async (req, res) => {
     const validationErrors = validationResult(req);
 
@@ -63,19 +62,23 @@ export const createOne: RequestHandler[] = [
     }
 
     const user = assertUser(req);
-    const imagesLocalData = req.files;
-    let images: { publicId: string; url: string }[] = [];
+    const localImagesData = req.files;
+    let cloudImagesData: { publicId: string; url: string }[] = [];
 
-    if (Array.isArray(imagesLocalData)) {
-      const uploadPromises = imagesLocalData.map((image) => {
-        return uploadToCloud(image.path);
+    if (Array.isArray(localImagesData) && localImagesData.length) {
+      // upload to cloud
+      const uploadPromises = localImagesData.map((data) => {
+        return uploadToCloud(data.path);
       });
 
       const results = await Promise.all(uploadPromises);
-      images = results.map((image) => ({
+      cloudImagesData = results.map((image) => ({
         publicId: image.public_id,
         url: image.secure_url || image.url,
       }));
+
+      // delete local files asyncronously in background
+      localImagesData.forEach((data) => deleteLocalFile(data.path));
     }
 
     const { title, content, status, category, tags } = req.body;
@@ -85,7 +88,7 @@ export const createOne: RequestHandler[] = [
       content,
       status,
       category,
-      images,
+      cloudImagesData,
       tags,
     );
 

@@ -2,18 +2,26 @@ import multer, { diskStorage, Options } from "multer";
 import ErrorBadRequest from "../libs/http-exceptions/error-bad-requeset.http-exception";
 import assertUser from "../libs/asserts/assert-user";
 import fs from "fs";
-import path from "path";
-
-//  upload directory path, /public/uploads
-const uploadDir = path.join(__dirname, "..", "public", "uploads");
-
-// Ensure the directory exists
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
 
 const storageOptions: Options["storage"] = diskStorage({
-  destination: uploadDir,
+  destination(_req, _file, callback) {
+    const uploadDir = "./public/uploads";
+
+    try {
+      // Ensure the directory exists
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      callback(null, uploadDir);
+    } catch (error) {
+      if (error instanceof Error) {
+        callback(error, uploadDir);
+      } else {
+        callback(new Error("Failed to create directory."), uploadDir);
+      }
+    }
+  },
 
   filename(req, file, callback) {
     try {
@@ -25,13 +33,12 @@ const storageOptions: Options["storage"] = diskStorage({
     } catch (error) {
       if (error instanceof Error) {
         callback(error, file.filename);
-        return;
+      } else {
+        callback(
+          new Error("Failed to generate unique filename during the upload."),
+          file.filename,
+        );
       }
-
-      callback(
-        new Error("Failed to generate unique filename during the upload."),
-        file.filename,
-      );
     }
   },
 });
