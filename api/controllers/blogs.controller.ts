@@ -46,6 +46,8 @@ export const createOne: RequestHandler[] = [
   blogValidations.category(),
   blogValidations.tags(),
 
+  localUpload.array("images"),
+
   async (req, res) => {
     const validationErrors = validationResult(req);
 
