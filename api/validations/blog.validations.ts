@@ -10,7 +10,7 @@ export const title = () => {
     .trim()
     .notEmpty()
     .withMessage("Title is required.")
-    .isLength({ min: MIN_LENGTH, max: MIN_LENGTH })
+    .isLength({ min: MIN_LENGTH, max: MAX_LENGTH })
     .withMessage(
       `Title must be between ${MIN_LENGTH} and ${MAX_LENGTH} characters.`,
     );
@@ -24,7 +24,7 @@ export const content = () => {
     .trim()
     .notEmpty()
     .withMessage("Content is required.")
-    .isLength({ min: MIN_LENGTH, max: MIN_LENGTH })
+    .isLength({ min: MIN_LENGTH })
     .withMessage(`Content must be atleast ${MIN_LENGTH} characters long.`);
 };
 
@@ -42,18 +42,15 @@ export const status = () => {
 
       return VALID_STATUSES.includes(status);
     })
-    .withMessage(`Stauts must be either ${VALID_STATUSES.join(" or ")}.`);
+    .withMessage(
+      `Stauts must be either ${VALID_STATUSES.join("/").toUpperCase()}.`,
+    );
 };
 
 export const category = () => {
   const VALID_CATEGORIES = ["web_dev", "game_dev", "offtopic"];
 
   return body("category")
-    .isAlpha()
-    .trim()
-    .notEmpty()
-    .withMessage("Category is required.")
-    .withMessage("Category must be only alphabatic characters.")
     .custom((category) => {
       if (typeof category !== "string") {
         return false;
@@ -61,7 +58,9 @@ export const category = () => {
 
       return VALID_CATEGORIES.includes(category.toLowerCase());
     })
-    .withMessage(`Stauts must be either ${VALID_CATEGORIES.join(" or ")}.`);
+    .withMessage(
+      `Category must be either ${VALID_CATEGORIES.join("/").toUpperCase()}.`,
+    );
 };
 
 export const tags = () => {

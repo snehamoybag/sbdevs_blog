@@ -1,10 +1,14 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import handleError404 from "./middlewares/handle-404.middleware";
 import handleRequestError from "./middlewares/handle-req-error.middleware";
 import * as routes from "./routes";
 
 const app = express();
+
+// set up cors
+app.use(cors());
 
 // BODY PARSERS
 app.use(express.urlencoded({ extended: true }));

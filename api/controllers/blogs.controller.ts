@@ -5,7 +5,6 @@ import FailureResponse from "../libs/http-response-shapes/failure.response-shape
 import * as blogValidations from "../validations/blog.validations";
 import localUpload from "../configs/multer.config";
 import assertUser from "../libs/asserts/assert-user";
-import { Multer } from "multer";
 import uploadToCloud from "../libs/utils/upload-to-cloud";
 import { validationResult } from "express-validator";
 

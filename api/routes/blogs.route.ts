@@ -10,7 +10,7 @@ blogs.get("/", blogsController.getMany);
 blogs.post(
   "/",
   authenticateJWT,
-  verifyBlogWriteAccess,
+  // verifyBlogWriteAccess,
   blogsController.createOne,
 );
 

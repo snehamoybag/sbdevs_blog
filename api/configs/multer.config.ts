@@ -1,9 +1,19 @@
 import multer, { diskStorage, Options } from "multer";
 import ErrorBadRequest from "../libs/http-exceptions/error-bad-requeset.http-exception";
 import assertUser from "../libs/asserts/assert-user";
+import fs from "fs";
+import path from "path";
+
+//  upload directory path, /public/uploads
+const uploadDir = path.join(__dirname, "..", "public", "uploads");
+
+// Ensure the directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 const storageOptions: Options["storage"] = diskStorage({
-  destination: "./public/uploads/", // make sure 'public/uploads' is already present in the root of the project
+  destination: uploadDir,
 
   filename(req, file, callback) {
     try {
