@@ -3,7 +3,6 @@ import * as blogModel from "../models/blog.model";
 import SuccessResponse from "../libs/http-response-shapes/success.response-shape";
 import FailureResponse from "../libs/http-response-shapes/failure.response-shape";
 import * as blogValidations from "../validations/blog.validations";
-import localUpload from "../configs/multer.config";
 import assertUser from "../libs/asserts/assert-user";
 import uploadToCloud from "../libs/utils/upload-to-cloud";
 import { validationResult } from "express-validator";
@@ -46,10 +45,10 @@ export const createOne: RequestHandler[] = [
   blogValidations.category(),
   blogValidations.tags(),
 
-  localUpload.array("images"),
-
-  async (req, res) => {
+  // handle validation failures
+  (req, res, next) => {
     const validationErrors = validationResult(req);
+    const localImagesData = req.files;
 
     if (!validationErrors.isEmpty()) {
       const statusCode = 400;
@@ -60,9 +59,19 @@ export const createOne: RequestHandler[] = [
         }),
       );
 
+      // delete local files asyncronously in background
+      if (Array.isArray(localImagesData) && localImagesData.length) {
+        localImagesData.forEach((data) => deleteLocalFile(data.path));
+      }
+
       return;
     }
 
+    next();
+  },
+
+  // handle blog creation on successful validation
+  async (req, res) => {
     const user = assertUser(req);
     const localImagesData = req.files;
     let cloudImagesData: { publicId: string; url: string }[] = [];
